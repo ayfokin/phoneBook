@@ -25,6 +25,7 @@ except AttributeError:
 class Ui_ContactTemplate(object):
     def setupUi(self, ContactTemplate):
         ContactTemplate.setObjectName(_fromUtf8("ContactTemplate"))
+        ContactTemplate.setWindowModality(QtCore.Qt.ApplicationModal)
         ContactTemplate.resize(440, 360)
         ContactTemplate.setMinimumSize(QtCore.QSize(440, 360))
         ContactTemplate.setMaximumSize(QtCore.QSize(440, 360))
@@ -47,13 +48,13 @@ class Ui_ContactTemplate(object):
         self.phoneNumber = QtGui.QLineEdit(ContactTemplate)
         self.phoneNumber.setMinimumSize(QtCore.QSize(200, 30))
         self.phoneNumber.setMaximumSize(QtCore.QSize(200, 30))
-        self.phoneNumber.setMaxLength(20)
+        self.phoneNumber.setMaxLength(12)
         self.phoneNumber.setObjectName(_fromUtf8("phoneNumber"))
         self.gridLayout.addWidget(self.phoneNumber, 1, 0, 1, 1)
         self.username = QtGui.QLineEdit(ContactTemplate)
         self.username.setMinimumSize(QtCore.QSize(200, 30))
         self.username.setMaximumSize(QtCore.QSize(200, 30))
-        self.username.setMaxLength(20)
+        self.username.setMaxLength(25)
         self.username.setObjectName(_fromUtf8("username"))
         self.gridLayout.addWidget(self.username, 0, 0, 1, 1)
         self.birthDate = QtGui.QDateEdit(ContactTemplate)

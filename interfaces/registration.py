@@ -105,7 +105,7 @@ class Ui_Registration(object):
         Registration.setTabOrder(self.regButton, self.cancelButton)
 
     def retranslateUi(self, Registration):
-        Registration.setWindowTitle(_translate("Registration", "Form", None))
+        Registration.setWindowTitle(_translate("Registration", "Регистрация", None))
         self.title.setText(_translate("Registration", "Регистрация", None))
         self.email.setPlaceholderText(_translate("Registration", "Электронная почта", None))
         self.username.setPlaceholderText(_translate("Registration", "Имя пользователя", None))

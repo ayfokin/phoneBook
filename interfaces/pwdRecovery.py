@@ -79,7 +79,7 @@ class Ui_PwdRecovery(object):
         PwdRecovery.setTabOrder(self.changePwd, self.cancelButton)
 
     def retranslateUi(self, PwdRecovery):
-        PwdRecovery.setWindowTitle(_translate("PwdRecovery", "Form", None))
+        PwdRecovery.setWindowTitle(_translate("PwdRecovery", "Восстановление", None))
         self.title.setText(_translate("PwdRecovery", "Восстановление пароля", None))
         self.email.setPlaceholderText(_translate("PwdRecovery", "Адрес электронной почты", None))
         self.changePwd.setText(_translate("PwdRecovery", "Сменить пароль", None))

@@ -87,6 +87,10 @@ class Ui_ContactTemplate(object):
 
         self.retranslateUi(ContactTemplate)
         QtCore.QMetaObject.connectSlotsByName(ContactTemplate)
+        ContactTemplate.setTabOrder(self.username, self.phoneNumber)
+        ContactTemplate.setTabOrder(self.phoneNumber, self.birthDate)
+        ContactTemplate.setTabOrder(self.birthDate, self.okButton)
+        ContactTemplate.setTabOrder(self.okButton, self.cancelButton)
 
     def retranslateUi(self, ContactTemplate):
         ContactTemplate.setWindowTitle(_translate("ContactTemplate", "Шаблон", None))

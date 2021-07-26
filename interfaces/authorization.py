@@ -110,8 +110,15 @@ class Ui_Authorization(object):
         font.setUnderline(True)
         self.forgotPwd.setFont(font)
         self.forgotPwd.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
+        self.forgotPwd.setStyleSheet(_fromUtf8("QPushButton {\n"
+"    border: None;\n"
+"}\n"
+"\n"
+"QPushButton:pressed {\n"
+"    border: None;\n"
+"}"))
         self.forgotPwd.setDefault(False)
-        self.forgotPwd.setFlat(True)
+        self.forgotPwd.setFlat(False)
         self.forgotPwd.setObjectName(_fromUtf8("forgotPwd"))
         self.gridLayout_3.addWidget(self.forgotPwd, 1, 0, 1, 1)
         spacerItem2 = QtGui.QSpacerItem(20, 30, QtGui.QSizePolicy.Minimum, QtGui.QSizePolicy.Fixed)
@@ -129,7 +136,7 @@ class Ui_Authorization(object):
         Authorization.setTabOrder(self.showPwd, self.forgotPwd)
 
     def retranslateUi(self, Authorization):
-        Authorization.setWindowTitle(_translate("Authorization", "Form", None))
+        Authorization.setWindowTitle(_translate("Authorization", "Авторизация", None))
         self.title.setText(_translate("Authorization", "Окно авторизации", None))
         self.pwd.setPlaceholderText(_translate("Authorization", "Пароль", None))
         self.username.setPlaceholderText(_translate("Authorization", "Имя пользователя", None))

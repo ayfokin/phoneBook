@@ -36,10 +36,18 @@ class Ui_MainScreen(object):
         font.setPointSize(7)
         self.listWidget.setFont(font)
         self.listWidget.setStyleSheet(_fromUtf8("QListWidget::Item { \n"
+"    selection-background-color: darkblue;\n"
 "    background-color:lightgrey;\n"
 "    border: 1px solid grey;\n"
 "    height: 25;\n"
-"}"))
+"}\n"
+"\n"
+"QListWidget::Item:selected {\n"
+"    background-color: #EAEAEA;\n"
+"}\n"
+"\n"
+"\n"
+""))
         self.listWidget.setFrameShape(QtGui.QFrame.StyledPanel)
         self.listWidget.setLineWidth(1)
         self.listWidget.setMidLineWidth(0)
@@ -101,11 +109,10 @@ class Ui_MainScreen(object):
 "    gridline-color: #919191;\n"
 "    alternate-background-color: #e4e4e4;\n"
 "    background-color: white;\n"
+"    selection-background-color: #818181;\n"
+"    selection-color: white;\n"
 "}\n"
-"\n"
-"QFrame {\n"
-"\n"
-"}"))
+""))
         self.tableWidget.setFrameShape(QtGui.QFrame.StyledPanel)
         self.tableWidget.setFrameShadow(QtGui.QFrame.Plain)
         self.tableWidget.setLineWidth(1)
@@ -156,8 +163,16 @@ class Ui_MainScreen(object):
         font.setUnderline(True)
         self.username.setFont(font)
         self.username.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))
-        self.username.setStyleSheet(_fromUtf8("text-align: left;"))
-        self.username.setFlat(True)
+        self.username.setStyleSheet(_fromUtf8("QPushButton {\n"
+"    text-align: left;\n"
+"    border: None;\n"
+"    color: blue;\n"
+"}\n"
+"\n"
+"QPushButton:pressed {\n"
+"    border: None;\n"
+"}"))
+        self.username.setFlat(False)
         self.username.setObjectName(_fromUtf8("username"))
         self.gridLayout_2.addWidget(self.username, 2, 6, 1, 1)
         spacerItem2 = QtGui.QSpacerItem(40, 20, QtGui.QSizePolicy.Expanding, QtGui.QSizePolicy.Minimum)
@@ -166,9 +181,11 @@ class Ui_MainScreen(object):
         self.addContactButton.setObjectName(_fromUtf8("addContactButton"))
         self.gridLayout_2.addWidget(self.addContactButton, 2, 1, 1, 1)
         self.editContactButton = QtGui.QPushButton(self.frame)
+        self.editContactButton.setEnabled(False)
         self.editContactButton.setObjectName(_fromUtf8("editContactButton"))
         self.gridLayout_2.addWidget(self.editContactButton, 2, 2, 1, 1)
         self.deleteContactButton = QtGui.QPushButton(self.frame)
+        self.deleteContactButton.setEnabled(False)
         self.deleteContactButton.setObjectName(_fromUtf8("deleteContactButton"))
         self.gridLayout_2.addWidget(self.deleteContactButton, 2, 3, 1, 1)
         self.enterAs = QtGui.QLabel(self.frame)

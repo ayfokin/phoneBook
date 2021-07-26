@@ -34,7 +34,7 @@ class Database:
     def deleteContact(self, name, phone, birthdate):
         self._execute("DELETE FROM contacts WHERE name = %s AND phone = %s AND birthdate = DATE %s", (name, phone, birthdate))
 
-    def editContact(self, name, phone, birthdate, new_name, new_phone, new_birthdate):
+    def editContact(self, new_name, new_phone, new_birthdate, name, phone, birthdate):
         self._execute("UPDATE contacts SET name = %s, phone = %s, birthdate = %s "
                       "WHERE name = %s AND phone = %s AND birthdate = DATE %s",
                       (new_name, new_phone, new_birthdate, name, phone, birthdate))
@@ -44,6 +44,11 @@ class Database:
             self._execute("SELECT 1 FROM users WHERE username = %s", (username,))
         else:
             self._execute("SELECT 1 FROM users WHERE username = %s AND password = %s", (username, password))
+        return True if self.cur.fetchall() else False
+
+    def checkContact(self, name, phone, birthdate):
+        self._execute("SELECT 1 FROM contacts WHERE name = %s AND phone = %s AND birthdate = DATE %s",
+                      (name, phone, birthdate))
         return True if self.cur.fetchall() else False
 
     def selectContacts(self):

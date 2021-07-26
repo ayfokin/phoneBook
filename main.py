@@ -1,17 +1,17 @@
 # coding=utf-8
 import datetime
-import locale
-import os
+import json
 import sys
 import re
 
-from PyQt4.QtCore import QDate, QTranslator, QLocale, QLibraryInfo, QCoreApplication
+from PyQt4.QtCore import QDate, QTranslator, QLocale, QLibraryInfo, Qt
 from PyQt4.QtGui import QWidget, QMessageBox, QLineEdit, QMainWindow, QApplication, QDialog, QTableWidgetItem
 from interfaces.authorization import Ui_Authorization
 from interfaces.pwdRecovery import Ui_PwdRecovery
 from interfaces.mainScreen import Ui_MainScreen
 from interfaces.registration import Ui_Registration
 from interfaces.contactTemplate import Ui_ContactTemplate
+from interfaces.nearestBirth import Ui_NearestBirth
 from database import Database
 
 
@@ -37,10 +37,17 @@ class Login(QWidget, Ui_Authorization):
         self.forgotPwd.clicked.connect(self.forgot)
 
     def enterButtonClicked(self):
-        username = str(self.username.text().toUtf8())
-        password = str(self.pwd.text().toUtf8())
+        username = str(self.username.text().toUtf8()).decode("utf-8")
+        password = str(self.pwd.text().toUtf8()).decode("utf-8")
+
+        if self.rememberMe.isChecked():
+            data = {"username": username, "password": password}
+            with open("auth.json", "w") as auth_file:
+                json.dump(data, auth_file)
+
+
         if self.parent.isUserExists(username, password):
-            self.parent.mainScreenWindow()
+            self.parent.mainScreenWindow(username)
             self.close()
         else:
             msgbox = QMessageBox()
@@ -60,9 +67,9 @@ class Login(QWidget, Ui_Authorization):
 
     def changePwdShow(self):
         if self.showPwd.isChecked():
-            self.pwd.setEchoMode(QLineEdit.EchoMode.Normal)
+            self.pwd.setEchoMode(QLineEdit.Normal)
         else:
-            self.pwd.setEchoMode(QLineEdit.EchoMode.Password)
+            self.pwd.setEchoMode(QLineEdit.PasswordEchoOnEdit)
 
 
 class Registration(QWidget, Ui_Registration):
@@ -150,13 +157,29 @@ class PwdRecovery(QWidget, Ui_PwdRecovery):
                 self.changePwd.setDisabled(True)
 
 
-class MainScreen(QWidget, Ui_MainScreen):
+class NearestBirth(QWidget, Ui_NearestBirth):
     def __init__(self, parent):
+        super(NearestBirth, self).__init__()
+        self.setupUi(self)
+        self.parent = parent
+        self.okButton.clicked.connect(self.close)
+        for i, contact in enumerate(self.parent.nearBirth):
+            for j, field in enumerate(contact):
+                if isinstance(field, datetime.date):
+                    field = QDate(field)
+                    field = field.toString("d MMMM yyyy")
+                self.tableWidget.setItem(i, j, QTableWidgetItem(field))
+
+
+class MainScreen(QWidget, Ui_MainScreen):
+    def __init__(self, parent, user):
         super(MainScreen, self).__init__()
         self.setupUi(self)
         self.parent = parent
         self.tabsort = [u'Б', u'Г', u'Е', u'Й', u'Л', u'Н', u'П', u'С', u'У', u'Х', u'Щ', u'Э', u'Я']
         self.contacts = [[] for _ in range(len(self.tabsort))]
+
+        self.listWidget.setFocusPolicy(Qt.NoFocus)
 
         self.addContactButton.clicked.connect(self.insert)
         self.editContactButton.clicked.connect(self.edit)
@@ -165,12 +188,46 @@ class MainScreen(QWidget, Ui_MainScreen):
 
         self.tableWidget.horizontalHeader().setClickable(False)
 
+        self.username.setText(user)
+        self.username.clicked.connect(self.usernameButtonClicked)
+
+        self.tableWidget.itemSelectionChanged.connect(self.checkButtons)
+
         contacts = self.parent.database.selectContacts()
+        self.nearBirth = []
+        now = datetime.date.today()
         index = 0
         for contact in contacts:
+            if (now - contact[2]).days % 365 < 7:
+                self.nearBirth.append(contact)
             self.insertContact(contact, index=index)
         self.listWidget.setCurrentRow(0)
         self.updateTable()
+        if self.nearBirth:
+            self.showNearBirth()
+
+    def showNearBirth(self):
+        self.nearestBirth = NearestBirth(self)
+        self.nearestBirth.show()
+
+    def usernameButtonClicked(self):
+        msgbox = QMessageBox()
+        reply = msgbox.question(self, u"Выход", u"Вы действительно хотите выйти?",
+                                msgbox.Yes, msgbox.No)
+        if reply == QMessageBox.Yes:
+            data = {"username": "", "password": ""}
+            with open("auth.json", "w") as auth_file:
+                json.dump(data, auth_file)
+            self.close()
+            self.parent.loginWindow()
+
+    def checkButtons(self):
+        if self.tableWidget.selectedItems():
+            self.editContactButton.setEnabled(True)
+            self.deleteContactButton.setEnabled(True)
+        else:
+            self.editContactButton.setDisabled(True)
+            self.deleteContactButton.setDisabled(True)
 
     def insertContact(self, contact, sort=True, index=0):
         letter = contact[0][0].upper()
@@ -187,6 +244,7 @@ class MainScreen(QWidget, Ui_MainScreen):
                 else:
                     left = middle + 1
             self.contacts[index].insert(right, contact)
+        self.listWidget.setCurrentRow(index)
 
     def editContact(self, contact):
         self.deleteContact()
@@ -227,7 +285,6 @@ class MainScreen(QWidget, Ui_MainScreen):
             self.updateTable()
 
 
-
 class ContactTemplate(QDialog, Ui_ContactTemplate):
     def __init__(self, parent):
         super(ContactTemplate, self).__init__()
@@ -255,11 +312,9 @@ class ContactTemplate(QDialog, Ui_ContactTemplate):
             msgbox.warning(self, u"Ошибка", u"Введите корректный номер телефона в формате +12345678900")
             return
 
-
-        # TODO: edit after creating array of contacts
-        # if self.parent.database.checkContact(name, phone, birth):
-        #     msgbox.warning(self, u"Ошибка", u"Контакт с такими данными уже существует")
-        #     return
+        if self.parent.parent.database.checkContact(name, phone, str(QDate(birth).toString("yyyy-MM-dd").toUtf8()).decode("utf-8")):
+            msgbox.warning(self, u"Ошибка", u"Контакт с такими данными уже существует")
+            return
 
         self.applyChanges(name, phone, birth)
         msgbox.information(self, u"Успех", self.informationText)
@@ -293,7 +348,11 @@ class EditContact(ContactTemplate):
         self.birthDate.setDate(QDate.fromString(self.parent.tableWidget.selectedItems()[2].text(), "d MMMM yyyy"))
 
     def applyChanges(self, name, phone, birth):
-        self.parent.parent.database.editContact(name, phone, str(QDate(birth).toString("yyyy-MM-dd").toUtf8()).decode("utf-8"))
+        tab = self.parent.listWidget.currentRow()
+        row = self.parent.tableWidget.currentRow()
+        contact = self.parent.contacts[tab][row]
+        self.parent.parent.database.editContact(name, phone, str(QDate(birth).toString("yyyy-MM-dd").toUtf8()).decode("utf-8"),
+                                                contact[0], contact[1], contact[2])
         self.parent.editContact((name, phone, birth.toPyDate()))
 
 
@@ -301,6 +360,16 @@ class PhoneBook(QMainWindow):
     def __init__(self):
         super(PhoneBook, self).__init__()
         self.database = Database()
+
+    def start(self):
+        with open("auth.json", "r") as auth_file:
+            auth = json.load(auth_file)
+        username = auth[u"username"]
+        password = auth[u"password"]
+        if username != "" and self.isUserExists(username, password):
+            self.mainScreenWindow(username)
+        else:
+            self.loginWindow()
 
     def loginWindow(self):
         self.login = Login(self)
@@ -314,8 +383,8 @@ class PhoneBook(QMainWindow):
         self.recovery = PwdRecovery(self)
         self.recovery.show()
 
-    def mainScreenWindow(self):
-        self.mainScreen = MainScreen(self)
+    def mainScreenWindow(self, user):
+        self.mainScreen = MainScreen(self, user)
         self.mainScreen.show()
 
     def isUserExists(self, username, password=None):
@@ -330,5 +399,5 @@ app.installTranslator(qt_translator)
 
 
 window = PhoneBook()
-window.loginWindow()
+window.start()
 sys.exit(app.exec_())

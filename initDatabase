@@ -1,0 +1,15 @@
+create database if not exists phone_book CHARACTER SET 'utf8' COLLATE 'utf8_unicode_ci';
+
+use phone_book;
+
+create table if not exists users(
+    username VARCHAR(15) NOT NULL,
+    password VARCHAR(15) NOT NULL,
+    email VARCHAR(256) NOT NULL
+);
+
+create table if not exists contacts(
+    name VARCHAR(30) NOT NULL,
+    phone VARCHAR(15) NOT NULL,
+    birthDate DATE NOT NULL
+);
